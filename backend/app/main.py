@@ -1,11 +1,16 @@
 from pydantic import BaseModel
 from fastapi import FastAPI
 from app.extraction import extract_invoice
-
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 class ExtractRequest(BaseModel):
-    extracted_text: str
+    text: str
 
 @app.get("/health")
 def health_check():
@@ -13,5 +18,5 @@ def health_check():
 
 @app.post("/extract_invoice")    
 def extract_invoice_endpoint(request: ExtractRequest):
-    extracted_data = extract_invoice(request.extracted_text)
+    extracted_data = extract_invoice(request.text)
     return extracted_data

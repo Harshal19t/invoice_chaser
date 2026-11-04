@@ -35,7 +35,7 @@ def parse_date(cls, v):
     if v is None:
         return None
     if isinstance(v, str):
-        for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%d %B %Y", "%B %d, %Y"):
+        for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%d %B %Y", "%B %d, %Y", "%d %b %Y", "%B %d %Y"):
             try:
                 from datetime import datetime
                 return datetime.strptime(v, fmt).date()
