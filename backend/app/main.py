@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from fastapi import FastAPI
 from app.extraction import extract_invoice
+from app.database import supabase
 from app.ledger import save_invoice_to_db
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
@@ -17,6 +18,11 @@ class ExtractRequest(BaseModel):
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+@app.get("/invoices")
+def get_invoices():
+    response = supabase.table("invoices").select("*").order("created_at", desc=True).execute()
+    return response.data
 
 @app.post("/extract_invoice")    
 def extract_invoice_endpoint(request: ExtractRequest):

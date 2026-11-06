@@ -19,6 +19,8 @@ export default function AddInvoicePage() {
   const [loading,setLoading] = useState(false);
   const [result, setResult] = useState<InvoiceResult | null>(null)
   const [error,setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   
   async function handleExtract() {
     setLoading(true);
@@ -45,6 +47,29 @@ export default function AddInvoicePage() {
     setLoading(false)
   }
   }
+
+  async function handleSave() {
+    setSaving(true);
+    setSaved(false);
+    try {
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/invoices", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({text}),
+      })
+      if (!response.ok) {
+        throw new Error("Server error: " + response.status)
+      }
+      setSaved(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unknown error occurred")
+    } finally {
+      setSaving(false);
+    }
+  }
+
     return( 
   <div>
     <h1>Add Invoice</h1>
@@ -59,7 +84,7 @@ export default function AddInvoicePage() {
   <div>
     <h2>Extracted Details</h2>
     {result.needs_review && (
-      <p style={{ color: "orange" }}>⚠️ Check these details before saving</p>
+      <p style={{ color: "orange" }}>Check these details before saving</p>
     )}
     <p><strong>Client:</strong> {result.client_name ?? "Not found"}</p>
     <p><strong>Invoice #:</strong> {result.invoice_number ?? "Not found"}</p>
@@ -68,7 +93,16 @@ export default function AddInvoicePage() {
     <p><strong>Due date:</strong> {result.due_date ?? "Not found"}</p>
     <p><strong>Confidence:</strong> {result.confidence ? (result.confidence * 100).toFixed(0) + "%" : "Unknown"}</p>
     {result.notes && <p><strong>Notes:</strong> {result.notes}</p>}
+
+    {!saved ? (
+  <button onClick={handleSave} disabled={saving}>
+    {saving ? "Saving..." : "Save to ledger"}
+  </button>
+) : (
+  <p> Saved to ledger</p>
+)}
   </div>
+  
 )}
 
 {error && (
