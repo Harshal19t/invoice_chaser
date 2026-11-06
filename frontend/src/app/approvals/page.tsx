@@ -25,49 +25,23 @@ const reminders = [
 
 export default function ApprovalsPage() {
   return (
-    <div>
-      <h1>Approvals</h1>
-      <h3>Nothing is sent until approved</h3>
-      <Link href="/">Back to Ledger</Link>
+  <div style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
+    <h1 style={{ margin: "0 0 4px 0", fontSize: "28px", fontWeight: 700, color: "#16202B" }}>Approvals</h1>
+    <p style={{ margin: "0 0 24px 0", color: "#4F5C6B" }}>Nothing is sent until you approve it.</p>
 
-      {/* <table>
-        <thead>
-          <tr>
-            <th>Client</th>
-            <th>Invoice #</th>
-            <th>Amount</th>
-            <th>Days Overdue</th>
-            <th>Email To</th>
-            <th>Email Subject</th>
-            <th>Email Body</th>
-          </tr>
-        </thead>
-        <tbody>
-          {reminders.map((reminder) => (
-            <tr key={reminder.invoice_number}>
-              <td>{reminder.client_name}</td>
-              <td>{reminder.invoice_number}</td>
-              <td>{reminder.currency}{reminder.amount}</td>
-              <td>{reminder.days_overdue} days</td>
-              <td>{reminder.email_to}</td>
-              <td>{reminder.email_subject}</td>
-              <td><pre>{reminder.email_body}</pre></td>
-            </tr>
-          ))}
-        </tbody>
-      </table> */}
-
-      {reminders.map((reminder) => (
-  <div key={reminder.invoice_number} style={{ border: "1px solid #ccc", padding: "16px", marginTop: "16px" }}>
-    <h2>{reminder.client_name} — {reminder.invoice_number}</h2>
-    <p>{reminder.currency} {reminder.amount} · {reminder.days_overdue} days overdue</p>
-    <p><strong>To:</strong> {reminder.email_to}</p>
-    <p><strong>Subject:</strong> {reminder.email_subject}</p>
-    <pre style={{ background: "#f5f5f5", padding: "12px" }}>{reminder.email_body}</pre>
-    <button>Approve and send</button>
-    <button style={{ marginLeft: "8px" }}>Reject</button>
+    {reminders.map((reminder) => (
+      <div key={reminder.invoice_number} style={{ background: "#fff", border: "1px solid #D5DBE2", borderRadius: "10px", padding: "24px", marginBottom: "16px" }}>
+        <h2 style={{ margin: "0 0 4px 0", fontSize: "18px", fontWeight: 600, color: "#16202B" }}>{reminder.client_name}</h2>
+        <p style={{ margin: "0 0 16px 0", color: "#9A4A06", fontWeight: 600 }}>{reminder.invoice_number} · {reminder.currency} {reminder.amount} · {reminder.days_overdue} days overdue</p>
+        <p style={{ margin: "0 0 4px 0", color: "#4F5C6B" }}><strong style={{ color: "#16202B" }}>To:</strong> {reminder.email_to}</p>
+        <p style={{ margin: "0 0 12px 0", color: "#4F5C6B" }}><strong style={{ color: "#16202B" }}>Subject:</strong> {reminder.email_subject}</p>
+        <pre style={{ background: "#F7F9FA", border: "1px solid #D5DBE2", borderRadius: "8px", padding: "16px", fontSize: "14px", lineHeight: 1.6, whiteSpace: "pre-wrap", margin: "0 0 16px 0" }}>{reminder.email_body}</pre>
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button style={{ background: "#0E6B5C", color: "#fff", border: "none", padding: "10px 22px", borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}>Approve and send</button>
+          <button style={{ background: "#fff", color: "#9A4A06", border: "1px solid #D5DBE2", padding: "10px 22px", borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}>Reject</button>
+        </div>
+      </div>
+    ))}
   </div>
-))}
-    </div>
-  )
+)
 }

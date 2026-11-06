@@ -24,11 +24,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <nav style={{ padding: "12px 24px", borderBottom: "1px solid #ccc", display: "flex", gap: "24px" }}>
-  <Link href="/">Ledger</Link>
-  <Link href="/add">Add Invoice</Link>
-  <Link href="/approvals">Approvals</Link>
+      <body className="min-h-full flex flex-col" style={{ background: "#EEF1F4", margin: 0, fontFamily: "sans-serif", color: "#16202B" }}>
+        <nav style={{
+  background: "#FFFFFF",
+  borderBottom: "1px solid #D5DBE2",
+  padding: "0 32px",
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  height: "56px"
+}}>
+  <span style={{ fontWeight: 700, fontSize: "18px", marginRight: "24px" }}>Chaser</span>
+  <Link href="/" style={{ padding: "0 12px", height: "36px", display: "flex", alignItems: "center", borderRadius: "8px", textDecoration: "none", color: "#16202B", fontSize: "15px" }}>Ledger</Link>
+  <Link href="/add" style={{ padding: "0 12px", height: "36px", display: "flex", alignItems: "center", borderRadius: "8px", textDecoration: "none", color: "#16202B", fontSize: "15px" }}>Add Invoice</Link>
+  <Link href="/approvals" style={{ padding: "0 12px", height: "36px", display: "flex", alignItems: "center", borderRadius: "8px", textDecoration: "none", color: "#16202B", fontSize: "15px" }}>Approvals</Link>
 </nav>
         {children}
         </body>
