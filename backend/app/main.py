@@ -35,11 +35,20 @@ def extract_invoice_endpoint(request: ExtractRequest):
 async def extract_pdf_endpoint(file: UploadFile = File(...)):
     file_bytes = await file.read()
     extracted_text = extract_text_from_pdf(file_bytes)
+    print("EXTRACTED TEXT:", extracted_text[:500])  # print first 500 chars
     extracted_data = extract_invoice(extracted_text)
     return extracted_data
 
 @app.post("/invoices")
 def save_invoice_endpoint(request: ExtractRequest):
     extracted_data = extract_invoice(request.text)
+    save_invoice_to_db(extracted_data)
+    return extracted_data
+
+@app.post("/save_pdf")
+async def save_pdf_endpoint(file: UploadFile = File(...)):
+    file_bytes = await file.read()
+    extracted_text = extract_text_from_pdf(file_bytes)
+    extracted_data = extract_invoice(extracted_text)
     save_invoice_to_db(extracted_data)
     return extracted_data

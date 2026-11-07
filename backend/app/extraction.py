@@ -18,13 +18,17 @@ SYSTEM_PROMPT = """You are an AI assistant that extracts structured data from in
 """
 
 
-def extract_invoice(extracted_text: str) -> InvoiceExtraction:
+def extract_invoice(text: str) -> InvoiceExtraction:
     response = client.chat.completions.create(
-        model= os.getenv("EXTRACTION_MODEL"),
+        model=os.getenv("EXTRACTION_MODEL"),
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": extracted_text},
+            {"role": "user", "content": text},
         ],
         response_format={"type": "json_object"},
+        max_tokens=1024,
     )
-    return InvoiceExtraction(**json.loads(response.choices[0].message.content))
+    raw = response.choices[0].message.content
+    print("RAW GROQ RESPONSE:", raw)  # add this line
+    data = json.loads(raw)
+    return InvoiceExtraction(**data)

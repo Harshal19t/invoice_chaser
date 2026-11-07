@@ -14,31 +14,34 @@ class InvoiceExtraction(BaseModel):
     confidence: Optional[float] = None
     notes: Optional[str] = None
 
+    @field_validator("issue_date", "due_date", mode="before")
+    @classmethod
+    def parse_date(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%d %B %Y", "%B %d, %Y", "%d %b %Y", "%B %d %Y"):
+                try:
+                    from datetime import datetime
+                    return datetime.strptime(v, fmt).date()
+                except ValueError:
+                    continue
+        return v
+
     @computed_field
     @property   
     def needs_review(self) -> bool:
-        if self.confidence is None or self.confidence < 0.8:
-            return True
-        if self.amount is None:
-            return True
-        if not self.currency:
-            return True
-        if not self.due_date:
-            return True
-        if self.is_invoice is None or self.is_invoice is False:
-            return True
-        return False
-
-@field_validator("issue_date", "due_date", mode="before")
-@classmethod
-def parse_date(cls, v):
-    if v is None:
-        return None
-    if isinstance(v, str):
-        for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%d %B %Y", "%B %d, %Y", "%d %b %Y", "%B %d %Y"):
+        ...
+        
+    @field_validator("amount", mode="before")
+    @classmethod
+    def parse_amount(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            cleaned = v.replace("£", "").replace("$", "").replace("€", "").replace(",", "").strip()
             try:
-                from datetime import datetime
-                return datetime.strptime(v, fmt).date()
-            except ValueError:
-                continue
-    return v
+                return Decimal(cleaned)
+            except Exception:
+                return None
+        return v

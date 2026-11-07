@@ -56,26 +56,31 @@ export default function AddInvoicePage() {
 }
 
   async function handleSave() {
-    setSaving(true);
-    setSaved(false);
-    try {
-      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/invoices", {
+  setSaving(true)
+  try {
+    let response
+    if (file) {
+      const formData = new FormData()
+      formData.append("file", file)
+      response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/save_pdf", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({text}),
+        body: formData,
       })
-      if (!response.ok) {
-        throw new Error("Server error: " + response.status)
-      }
-      setSaved(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred")
-    } finally {
-      setSaving(false);
+    } else {
+      response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/invoices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      })
     }
+    if (!response.ok) throw new Error("Server error: " + response.status)
+    setSaved(true)
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Something went wrong")
+  } finally {
+    setSaving(false)
   }
+}
 
    return (
   <div style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
