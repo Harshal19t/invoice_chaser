@@ -1,9 +1,11 @@
 from pydantic import BaseModel
-from fastapi import FastAPI
+from fastapi import FastAPI,File, UploadFile
 from app.extraction import extract_invoice
 from app.database import supabase
+from app.pdf import extract_text_from_pdf
 from app.ledger import save_invoice_to_db
 from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -27,6 +29,13 @@ def get_invoices():
 @app.post("/extract_invoice")    
 def extract_invoice_endpoint(request: ExtractRequest):
     extracted_data = extract_invoice(request.text)
+    return extracted_data
+
+@app.post("/extract_pdf")
+async def extract_pdf_endpoint(file: UploadFile = File(...)):
+    file_bytes = await file.read()
+    extracted_text = extract_text_from_pdf(file_bytes)
+    extracted_data = extract_invoice(extracted_text)
     return extracted_data
 
 @app.post("/invoices")

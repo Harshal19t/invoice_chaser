@@ -21,32 +21,39 @@ export default function AddInvoicePage() {
   const [error,setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [file, setFile] = useState<File | null>(null)
   
   async function handleExtract() {
-    setLoading(true);
-    setError(null);
-    setResult(null);
+  setLoading(true)
+  setError(null)
+  setResult(null)
 
-    try {
-      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/extract_invoice", {
+  try {
+    let response
+
+    if (file) {
+      const formData = new FormData()
+      formData.append("file", file)
+      response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/extract_pdf", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        body: formData,  // no Content-Type header — browser sets it automatically for FormData
+      })
+    } else {
+      response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/extract_invoice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
       })
-      if (!response.ok) {
-      throw new Error("Server error: " + response.status)
     }
 
-    const data = await response.json()
-    setResult(data)
+    if (!response.ok) throw new Error("Server error: " + response.status)
+    setResult(await response.json())
   } catch (err) {
-    setError(err instanceof Error ? err.message : "An unknown error occurred")
+    setError(err instanceof Error ? err.message : "Something went wrong")
   } finally {
     setLoading(false)
   }
-  }
+}
 
   async function handleSave() {
     setSaving(true);
@@ -76,6 +83,11 @@ export default function AddInvoicePage() {
     <p style={{ margin: "0 0 24px 0", color: "#4F5C6B" }}>Paste invoice text and well extract the details.</p>
 
     <div style={{ background: "#fff", border: "1px solid #D5DBE2", borderRadius: "10px", padding: "24px", marginBottom: "16px" }}>
+      <input
+  type="file"
+  accept=".pdf"
+  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+/>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
