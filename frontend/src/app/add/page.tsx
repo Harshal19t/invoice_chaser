@@ -1,5 +1,6 @@
 "use client";
 import {useState} from "react";
+import { createClient } from "@/lib/supabase";
 
 type InvoiceResult = {
   is_invoice: boolean | null
@@ -28,6 +29,11 @@ export default function AddInvoicePage() {
   setError(null)
   setResult(null)
 
+  const supabase = createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+  const token = session?.access_token ?? ""
+
+
   try {
     let response
 
@@ -36,12 +42,18 @@ export default function AddInvoicePage() {
       formData.append("file", file)
       response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/extract_pdf", {
         method: "POST",
+        headers:{
+          "Authorization": `Bearer ${token}`,
+        },
         body: formData,  // no Content-Type header — browser sets it automatically for FormData
       })
     } else {
       response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/extract_invoice", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
         body: JSON.stringify({ text }),
       })
     }
@@ -57,6 +69,12 @@ export default function AddInvoicePage() {
 
   async function handleSave() {
   setSaving(true)
+
+  const supabase = createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+  const token = session?.access_token ?? ""
+
+
   try {
     let response
     if (file) {
@@ -64,12 +82,18 @@ export default function AddInvoicePage() {
       formData.append("file", file)
       response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/save_pdf", {
         method: "POST",
+        headers:{
+          "Authorization": `Bearer ${token}`,
+        },
         body: formData,
       })
     } else {
       response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/invoices", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
         body: JSON.stringify({ text }),
       })
     }

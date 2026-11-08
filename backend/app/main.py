@@ -1,7 +1,9 @@
+import os
 from pydantic import BaseModel
-from fastapi import FastAPI,File, UploadFile
+from fastapi import FastAPI,File, Header, UploadFile, HTTPException
 from app.extraction import extract_invoice
 from app.database import supabase
+from supabase import create_client
 from app.pdf import extract_text_from_pdf
 from app.ledger import save_invoice_to_db
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,6 +15,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+def get_user_id(authorization: str) -> str:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing token")
+    token = authorization.split(" ")[1]
+    supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+    response = supabase.auth.get_user(token)
+    if not response.user:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return response.user.id
 
 class ExtractRequest(BaseModel):
     text: str
@@ -40,15 +51,19 @@ async def extract_pdf_endpoint(file: UploadFile = File(...)):
     return extracted_data
 
 @app.post("/invoices")
-def save_invoice_endpoint(request: ExtractRequest):
+def save_invoice_endpoint(request: ExtractRequest, authorization: str = Header(None)):
+    user_id = get_user_id(authorization)
+    token = authorization.split(" ")[1]
     extracted_data = extract_invoice(request.text)
-    save_invoice_to_db(extracted_data)
+    save_invoice_to_db(extracted_data, user_id, token)
     return extracted_data
 
 @app.post("/save_pdf")
-async def save_pdf_endpoint(file: UploadFile = File(...)):
+async def save_pdf_endpoint(file: UploadFile = File(...), authorization: str = Header(None)):
+    user_id = get_user_id(authorization)
+    token = authorization.split(" ")[1]
     file_bytes = await file.read()
     extracted_text = extract_text_from_pdf(file_bytes)
     extracted_data = extract_invoice(extracted_text)
-    save_invoice_to_db(extracted_data)
+    save_invoice_to_db(extracted_data, user_id, token)
     return extracted_data
