@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import SignOutButton from "@/components/SignOutButton";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -38,6 +40,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   <Link href="/" style={{ padding: "0 12px", height: "36px", display: "flex", alignItems: "center", borderRadius: "8px", textDecoration: "none", color: "#16202B", fontSize: "15px" }}>Ledger</Link>
   <Link href="/add" style={{ padding: "0 12px", height: "36px", display: "flex", alignItems: "center", borderRadius: "8px", textDecoration: "none", color: "#16202B", fontSize: "15px" }}>Add Invoice</Link>
   <Link href="/approvals" style={{ padding: "0 12px", height: "36px", display: "flex", alignItems: "center", borderRadius: "8px", textDecoration: "none", color: "#16202B", fontSize: "15px" }}>Approvals</Link>
+  <SignOutButton />
 </nav>
         {children}
         </body>
