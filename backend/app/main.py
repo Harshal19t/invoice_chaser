@@ -7,6 +7,7 @@ from supabase import create_client
 from app.pdf import extract_text_from_pdf
 from app.ledger import save_invoice_to_db
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import date
 
 app = FastAPI()
 app.add_middleware(
@@ -37,10 +38,31 @@ def get_invoices():
     response = supabase.table("invoices").select("*").order("created_at", desc=True).execute()
     return response.data
 
+
+@app.get("/invoices/overdue")
+def get_overdue_invoices():
+    today = date.today().isoformat()
+    response = supabase.table("invoices").select("*").eq("status", "pending").lt("due_date", today).order("due_date", desc=False).execute()
+    return response.data
+
 @app.post("/extract_invoice")    
 def extract_invoice_endpoint(request: ExtractRequest):
     extracted_data = extract_invoice(request.text)
     return extracted_data
+
+class ReminderRequest(BaseModel):
+    sender_name: str
+
+@app.post("/invoices/{invoice_id}/draft-reminder")
+def draft_reminder_endpoint(invoice_id: str, request: ReminderRequest):
+    response = supabase.table("invoices").select("*").eq("id", invoice_id).single().execute()
+    invoice = response.data
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    
+    from app.reminder import draft_reminder
+    email = draft_reminder(invoice, request.sender_name)
+    return {"subject": email.subject, "body": email.body}
 
 @app.post("/extract_pdf")
 async def extract_pdf_endpoint(file: UploadFile = File(...)):

@@ -1,47 +1,107 @@
-import Link from "next/link"
+"use client"
 
-const reminders = [
-  {
-    client_name: "Harbour & Pine",
-    invoice_number: "INV-2038",
-    amount: 2400,
-    currency: "GBP",
-    days_overdue: 13,
-    email_to: "accounts@harbourpine.example",
-    email_subject: "Invoice INV-2038: payment now overdue",
-    email_body: "Hi Harbour & Pine team,\n\nI'm following up on invoice INV-2038 for £2,400.00, which is now 13 days overdue.\n\nCould you let me know when payment will be made?\n\nThanks"
-  },
-  {
-    client_name: "Kestrel Foods",
-    invoice_number: "INV-2036",
-    amount: 3150,
-    currency: "GBP",
-    days_overdue: 7,
-    email_to: "pay@kestrelfoods.example",
-    email_subject: "Invoice INV-2036: payment overdue",
-    email_body: "Hi Kestrel Foods team,\n\nThis is a reminder that invoice INV-2036 for £3,150.00 is now 7 days overdue.\n\nPlease let us know when to expect payment.\n\nThanks"
-  }
-]
+import { useState, useEffect } from "react"
+import { createClient } from "@/lib/supabase"
+
+type Invoice = {
+  id: string
+  client_name: string
+  invoice_number: string
+  amount: number
+  currency: string
+  due_date: string
+  status: string
+}
+
+type DraftedEmail = {
+  subject: string
+  body: string
+}
 
 export default function ApprovalsPage() {
-  return (
-  <div style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
-    <h1 style={{ margin: "0 0 4px 0", fontSize: "28px", fontWeight: 700, color: "#16202B" }}>Approvals</h1>
-    <p style={{ margin: "0 0 24px 0", color: "#4F5C6B" }}>Nothing is sent until you approve it.</p>
+  const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [loading, setLoading] = useState(true)
+  const [drafts, setDrafts] = useState<Record<string, DraftedEmail>>({})
+  const [drafting, setDrafting] = useState<Record<string, boolean>>({})
+  const [senderName, setSenderName] = useState("")
 
-    {reminders.map((reminder) => (
-      <div key={reminder.invoice_number} style={{ background: "#fff", border: "1px solid #D5DBE2", borderRadius: "10px", padding: "24px", marginBottom: "16px" }}>
-        <h2 style={{ margin: "0 0 4px 0", fontSize: "18px", fontWeight: 600, color: "#16202B" }}>{reminder.client_name}</h2>
-        <p style={{ margin: "0 0 16px 0", color: "#9A4A06", fontWeight: 600 }}>{reminder.invoice_number} · {reminder.currency} {reminder.amount} · {reminder.days_overdue} days overdue</p>
-        <p style={{ margin: "0 0 4px 0", color: "#4F5C6B" }}><strong style={{ color: "#16202B" }}>To:</strong> {reminder.email_to}</p>
-        <p style={{ margin: "0 0 12px 0", color: "#4F5C6B" }}><strong style={{ color: "#16202B" }}>Subject:</strong> {reminder.email_subject}</p>
-        <pre style={{ background: "#F7F9FA", border: "1px solid #D5DBE2", borderRadius: "8px", padding: "16px", fontSize: "14px", lineHeight: 1.6, whiteSpace: "pre-wrap", margin: "0 0 16px 0" }}>{reminder.email_body}</pre>
-        <div style={{ display: "flex", gap: "12px" }}>
-          <button style={{ background: "#0E6B5C", color: "#fff", border: "none", padding: "10px 22px", borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}>Approve and send</button>
-          <button style={{ background: "#fff", color: "#9A4A06", border: "1px solid #D5DBE2", padding: "10px 22px", borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer" }}>Reject</button>
-        </div>
+  useEffect(() => {
+    fetch(process.env.NEXT_PUBLIC_API_URL + "/invoices/overdue")
+      .then(res => res.json())
+      .then(data => { setInvoices(data); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [])
+
+  async function handleDraft(invoice: Invoice) {
+    setDrafting(prev => ({ ...prev, [invoice.id]: true }))
+    const supabase = createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    const token = session?.access_token ?? ""
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invoices/${invoice.id}/draft-reminder`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ sender_name: senderName || "Your Name" }),
+    })
+    const data = await res.json()
+    setDrafts(prev => ({ ...prev, [invoice.id]: data }))
+    setDrafting(prev => ({ ...prev, [invoice.id]: false }))
+  }
+
+  if (loading) return <div style={{ padding: "40px" }}>Loading...</div>
+
+  return (
+    <div style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
+      <h1 style={{ margin: "0 0 8px 0", fontSize: "28px", fontWeight: 700, color: "#16202B" }}>Approvals</h1>
+      <p style={{ margin: "0 0 24px 0", color: "#4F5C6B" }}>Overdue invoices waiting for a chaser email.</p>
+
+      <div style={{ marginBottom: "32px" }}>
+        <label style={{ fontSize: "14px", fontWeight: 500, color: "#16202B", display: "block", marginBottom: "6px" }}>Your name (used in email sign-off)</label>
+        <input
+          value={senderName}
+          onChange={e => setSenderName(e.target.value)}
+          placeholder="e.g. Alex Johnson"
+          style={{ padding: "10px 12px", border: "1px solid #D5DBE2", borderRadius: "8px", fontSize: "14px", width: "300px" }}
+        />
       </div>
-    ))}
-  </div>
-)
+
+      {invoices.length === 0 && (
+        <p style={{ color: "#4F5C6B" }}>No overdue invoices. Nice work!</p>
+      )}
+
+      {invoices.map(invoice => (
+        <div key={invoice.id} style={{ background: "#fff", border: "1px solid #D5DBE2", borderRadius: "10px", padding: "24px", marginBottom: "16px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+            <div>
+              <p style={{ margin: "0 0 4px 0", fontWeight: 700, fontSize: "17px", color: "#16202B" }}>{invoice.client_name}</p>
+              <p style={{ margin: 0, fontSize: "14px", color: "#4F5C6B" }}>
+                {invoice.invoice_number} · {invoice.currency} {invoice.amount} · Due {invoice.due_date}
+              </p>
+            </div>
+            <button
+              onClick={() => handleDraft(invoice)}
+              disabled={drafting[invoice.id]}
+              style={{ background: "#0E6B5C", color: "#fff", border: "none", padding: "8px 18px", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
+            >
+              {drafting[invoice.id] ? "Drafting..." : "Draft reminder"}
+            </button>
+          </div>
+
+          {drafts[invoice.id] && (
+            <div style={{ background: "#F8FAFB", border: "1px solid #D5DBE2", borderRadius: "8px", padding: "16px", marginTop: "12px" }}>
+              <p style={{ margin: "0 0 8px 0", fontWeight: 600, fontSize: "14px", color: "#16202B" }}>
+                Subject: {drafts[invoice.id].subject}
+              </p>
+              <pre style={{ margin: 0, fontSize: "13px", color: "#374151", whiteSpace: "pre-wrap", fontFamily: "inherit" }}>
+                {drafts[invoice.id].body}
+              </pre>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
 }
