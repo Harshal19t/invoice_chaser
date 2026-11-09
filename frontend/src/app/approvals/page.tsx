@@ -23,6 +23,7 @@ export default function ApprovalsPage() {
   const [loading, setLoading] = useState(true)
   const [drafts, setDrafts] = useState<Record<string, DraftedEmail>>({})
   const [drafting, setDrafting] = useState<Record<string, boolean>>({})
+  const [sending, setSending] = useState<Record<string, boolean>>({})
   const [senderName, setSenderName] = useState("")
 
   useEffect(() => {
@@ -49,6 +50,25 @@ export default function ApprovalsPage() {
     const data = await res.json()
     setDrafts(prev => ({ ...prev, [invoice.id]: data }))
     setDrafting(prev => ({ ...prev, [invoice.id]: false }))
+  }
+
+  async function handleSend(invoice: Invoice) {
+    setSending(prev => ({ ...prev, [invoice.id]: true }))
+    const supabase = createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    const token = session?.access_token ?? ""
+
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invoices/${invoice.id}/send-reminder`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ sender_name: senderName || "Your Name" }),
+    })
+
+    setSending(prev => ({ ...prev, [invoice.id]: false }))
+    setInvoices(prev => prev.filter(i => i.id !== invoice.id))
   }
 
   if (loading) return <div style={{ padding: "40px" }}>Loading...</div>
@@ -81,13 +101,25 @@ export default function ApprovalsPage() {
                 {invoice.invoice_number} · {invoice.currency} {invoice.amount} · Due {invoice.due_date}
               </p>
             </div>
-            <button
-              onClick={() => handleDraft(invoice)}
-              disabled={drafting[invoice.id]}
-              style={{ background: "#0E6B5C", color: "#fff", border: "none", padding: "8px 18px", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
-            >
-              {drafting[invoice.id] ? "Drafting..." : "Draft reminder"}
-            </button>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                onClick={() => handleDraft(invoice)}
+                disabled={drafting[invoice.id]}
+                style={{ background: "#0E6B5C", color: "#fff", border: "none", padding: "8px 18px", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
+              >
+                {drafting[invoice.id] ? "Drafting..." : "Draft reminder"}
+              </button>
+
+              {drafts[invoice.id] && (
+                <button
+                  onClick={() => handleSend(invoice)}
+                  disabled={sending[invoice.id]}
+                  style={{ background: "#1D4ED8", color: "#fff", border: "none", padding: "8px 18px", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
+                >
+                  {sending[invoice.id] ? "Sending..." : "Send email"}
+                </button>
+              )}
+            </div>
           </div>
 
           {drafts[invoice.id] && (

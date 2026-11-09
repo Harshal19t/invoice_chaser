@@ -1,5 +1,6 @@
 import os
 import json
+import resend
 from groq import Groq
 from dotenv import load_dotenv
 from pydantic import BaseModel
@@ -37,3 +38,21 @@ Sender name: {sender_name}"""
     )
     data = json.loads(response.choices[0].message.content)
     return ReminderEmail(**data)
+
+def send_reminder(invoice: dict, sender_name: str) -> dict:
+    resend.api_key = os.getenv("RESEND_API_KEY")
+    
+    email = draft_reminder(invoice, sender_name)
+    
+    client_email = invoice.get("client_email")
+    if not client_email:
+        raise ValueError("No client email on this invoice")
+    
+    resend.Emails.send({
+        "from": "Chaser <onboarding@resend.dev>",
+        "to": client_email,
+        "subject": email.subject,
+        "text": email.body,
+    })
+    
+    return {"subject": email.subject, "body": email.body}

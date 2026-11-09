@@ -72,6 +72,21 @@ async def extract_pdf_endpoint(file: UploadFile = File(...)):
     extracted_data = extract_invoice(extracted_text)
     return extracted_data
 
+@app.post("/invoices/{invoice_id}/send-reminder")
+def send_reminder_endpoint(invoice_id: str, request: ReminderRequest, authorization: str = Header(None)):
+    get_user_id(authorization)
+    response = supabase.table("invoices").select("*").eq("id", invoice_id).single().execute()
+    invoice = response.data
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    
+    from app.reminder import send_reminder
+    result = send_reminder(invoice, request.sender_name)
+    
+    supabase.table("invoices").update({"status": "chased"}).eq("id", invoice_id).execute()
+    
+    return result
+
 @app.post("/invoices")
 def save_invoice_endpoint(request: ExtractRequest, authorization: str = Header(None)):
     user_id = get_user_id(authorization)
