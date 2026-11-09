@@ -104,3 +104,15 @@ async def save_pdf_endpoint(file: UploadFile = File(...), authorization: str = H
     extracted_data = extract_invoice(extracted_text)
     save_invoice_to_db(extracted_data, user_id, token)
     return extracted_data
+
+class StatusUpdate(BaseModel):
+    status: str
+
+@app.patch("/invoices/{invoice_id}/status")
+def update_invoice_status(invoice_id: str, request: StatusUpdate, authorization: str = Header(None)):
+    get_user_id(authorization)
+    token = authorization.split(" ")[1]
+    client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+    client.auth.set_session(token, "dummy-refresh")
+    client.table("invoices").update({"status": request.status}).eq("id", invoice_id).execute()
+    return {"status": request.status}

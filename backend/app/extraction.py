@@ -29,6 +29,5 @@ def extract_invoice(text: str) -> InvoiceExtraction:
         max_tokens=1024,
     )
     raw = response.choices[0].message.content
-    print("RAW GROQ RESPONSE:", raw)  # add this line
     data = json.loads(raw)
     return InvoiceExtraction(**data)
