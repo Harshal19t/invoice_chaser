@@ -73,7 +73,7 @@ export default function LedgerPage() {
   if (loading) return <div style={{ padding: "40px" }}>Loading...</div>
 
   return (
-    <div onClick={() => setOpenDropdown(null)} style={{ maxWidth: "1200px", margin: "0 auto", padding: "48px 40px" }}>
+    <div onClick={() => setOpenDropdown(null)} style={{ maxWidth: "900px", margin: "0 auto", padding: "48px 40px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
         <div>
           <h1 style={{ margin: "0 0 4px 0", fontSize: "26px", fontWeight: 700, color: "#16202B" }}>Ledger</h1>
