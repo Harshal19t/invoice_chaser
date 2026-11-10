@@ -12,7 +12,8 @@ from datetime import date
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000",  "https://*.vercel.app"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -68,7 +69,6 @@ def draft_reminder_endpoint(invoice_id: str, request: ReminderRequest):
 async def extract_pdf_endpoint(file: UploadFile = File(...)):
     file_bytes = await file.read()
     extracted_text = extract_text_from_pdf(file_bytes)
-    print("EXTRACTED TEXT:", extracted_text[:500])  # print first 500 chars
     extracted_data = extract_invoice(extracted_text)
     return extracted_data
 
