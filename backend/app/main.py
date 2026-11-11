@@ -45,9 +45,13 @@ def get_invoices(authorization: str = Header(None)):
 
 
 @app.get("/invoices/overdue")
-def get_overdue_invoices():
+def get_overdue_invoices(authorization: str = Header(None)):
+    get_user_id(authorization)
     today = date.today().isoformat()
-    response = supabase.table("invoices").select("*").in_("status", ["pending", "overdue"]).lt("due_date", today).order("due_date", desc=False).execute()
+    token = authorization.split(" ")[1]
+    client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+    client.auth.set_session(token, "dummy-refresh")
+    response = client.table("invoices").select("*").in_("status", ["pending", "overdue"]).lt("due_date", today).order("due_date", desc=False).execute()
     return response.data
 
 @app.post("/extract_invoice")    
