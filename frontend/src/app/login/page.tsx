@@ -47,7 +47,8 @@ export default function LoginPage() {
       display: "flex",
       alignItems: isMobile ? "flex-start" : "center",
       justifyContent: "center",
-      padding: isMobile ? "40px 20px" : "40px 24px",
+      padding: "40px 24px",
+      boxSizing: "border-box",
     }}>
       <div style={{
         display: "flex",
@@ -56,10 +57,11 @@ export default function LoginPage() {
         maxWidth: "960px",
         gap: isMobile ? "32px" : "60px",
         alignItems: isMobile ? "stretch" : "center",
+        overflow: "hidden",
       }}>
 
         {/* LEFT — logo + text */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
           <Image
             src={remin}
             alt="Remin"
@@ -116,6 +118,7 @@ export default function LoginPage() {
           borderRadius: "20px",
           padding: isMobile ? "36px 24px" : "48px 44px",
           boxShadow: "0 2px 24px rgba(0,0,0,0.07)",
+          boxSizing: "border-box",
         }}>
           <h1 style={{ margin: "0 0 6px 0", fontSize: "24px", fontWeight: 700, color: "#16202B" }}>
             {isSignUp ? "Create account" : "Welcome back"}
