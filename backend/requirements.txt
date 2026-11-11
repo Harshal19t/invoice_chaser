@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+supabase
+groq
+resend
+pydantic
+python-multipart
+pypdf2
