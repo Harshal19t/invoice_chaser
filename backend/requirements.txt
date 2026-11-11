@@ -5,5 +5,5 @@ groq
 resend
 pydantic
 python-multipart
-pypdf2
+pypdf
 python-dotenv
