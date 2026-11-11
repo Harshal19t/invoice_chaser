@@ -43,7 +43,7 @@ def get_invoices():
 @app.get("/invoices/overdue")
 def get_overdue_invoices():
     today = date.today().isoformat()
-    response = supabase.table("invoices").select("*").eq("status", "pending").lt("due_date", today).order("due_date", desc=False).execute()
+    response = supabase.table("invoices").select("*").in_("status", ["pending", "overdue"]).lt("due_date", today).order("due_date", desc=False).execute()
     return response.data
 
 @app.post("/extract_invoice")    
@@ -82,9 +82,10 @@ def send_reminder_endpoint(invoice_id: str, request: ReminderRequest, authorizat
     
     from app.reminder import send_reminder
     result = send_reminder(invoice, request.sender_name)
-    
-    supabase.table("invoices").update({"status": "chased"}).eq("id", invoice_id).execute()
-    
+    token = authorization.split(" ")[1]
+    client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+    client.auth.set_session(token, "dummy-refresh")
+    client.table("invoices").update({"status": "chased"}).eq("id", invoice_id).execute()
     return result
 
 @app.post("/invoices")
