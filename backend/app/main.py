@@ -35,8 +35,12 @@ def health_check():
     return {"status": "ok"}
 
 @app.get("/invoices")
-def get_invoices():
-    response = supabase.table("invoices").select("*").order("created_at", desc=True).execute()
+def get_invoices(authorization: str = Header(None)):
+    token = get_user_id(authorization)  # validates JWT
+    # Use user's token so RLS filters to their rows only
+    client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+    client.auth.set_session(authorization.split(" ")[1], "dummy-refresh")
+    response = client.table("invoices").select("*").execute()
     return response.data
 
 
