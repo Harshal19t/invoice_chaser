@@ -80,9 +80,12 @@ useEffect(() => {
 
   if (loading) return <div style={{ padding: "40px" }}>Loading...</div>
 
+    const width = typeof window !== "undefined" ? window.innerWidth : 900
+  const isMobile = width < 900
+
   return (
-    <div style={{ maxWidth: "900px", margin: "0 auto", padding: "40px 32px" }}>
-      <h1 style={{ margin: "0 0 8px 0", fontSize: "28px", fontWeight: 700, color: "#16202B" }}>Approvals</h1>
+    <div style={{ maxWidth: "900px", margin: "0 auto", padding: isMobile ? "24px 16px" : "40px 32px" }}>
+      <h1 style={{ margin: "0 0 8px 0", fontSize: isMobile ? "22px" : "28px", fontWeight: 700, color: "#16202B" }}>Approvals</h1>
       <p style={{ margin: "0 0 24px 0", color: "#4F5C6B" }}>Overdue invoices waiting for a chaser email.</p>
 
       <div style={{ marginBottom: "32px" }}>
@@ -91,7 +94,7 @@ useEffect(() => {
           value={senderName}
           onChange={e => setSenderName(e.target.value)}
           placeholder="e.g. Alex Johnson"
-          style={{ padding: "10px 12px", border: "1px solid #D5DBE2", borderRadius: "8px", fontSize: "14px", width: "300px" }}
+          style={{ padding: "10px 12px", border: "1px solid #D5DBE2", borderRadius: "8px", fontSize: "14px", width: isMobile ? "100%" : "300px", boxSizing: "border-box" }}
         />
       </div>
 
@@ -100,33 +103,30 @@ useEffect(() => {
       )}
 
       {invoices.map(invoice => (
-        <div key={invoice.id} style={{ background: "#fff", border: "1px solid #D5DBE2", borderRadius: "10px", padding: "24px", marginBottom: "16px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
-            <div>
-              <p style={{ margin: "0 0 4px 0", fontWeight: 700, fontSize: "17px", color: "#16202B" }}>{invoice.client_name}</p>
-              <p style={{ margin: 0, fontSize: "14px", color: "#4F5C6B" }}>
-                {invoice.invoice_number} · {invoice.currency} {invoice.amount} · Due {invoice.due_date}
-              </p>
-            </div>
-            <div style={{ display: "flex", gap: "8px" }}>
+        <div key={invoice.id} style={{ background: "#fff", border: "1px solid #D5DBE2", borderRadius: "10px", padding: "16px", marginBottom: "16px" }}>
+          {/* Client info */}
+          <p style={{ margin: "0 0 2px 0", fontWeight: 700, fontSize: "16px", color: "#16202B" }}>{invoice.client_name}</p>
+          <p style={{ margin: "0 0 12px 0", fontSize: "13px", color: "#4F5C6B" }}>
+            {invoice.invoice_number} · {invoice.currency} {invoice.amount} · Due {invoice.due_date}
+          </p>
+          {/* Buttons */}
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <button
+              onClick={() => handleDraft(invoice)}
+              disabled={drafting[invoice.id]}
+              style={{ background: "#0E6B5C", color: "#fff", border: "none", padding: "8px 18px", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", flex: isMobile ? "1" : "none" }}
+            >
+              {drafting[invoice.id] ? "Drafting..." : "Draft reminder"}
+            </button>
+            {drafts[invoice.id] && (
               <button
-                onClick={() => handleDraft(invoice)}
-                disabled={drafting[invoice.id]}
-                style={{ background: "#0E6B5C", color: "#fff", border: "none", padding: "8px 18px", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
+                onClick={() => handleSend(invoice)}
+                disabled={sending[invoice.id]}
+                style={{ background: "#1D4ED8", color: "#fff", border: "none", padding: "8px 18px", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", flex: isMobile ? "1" : "none" }}
               >
-                {drafting[invoice.id] ? "Drafting..." : "Draft reminder"}
+                {sending[invoice.id] ? "Sending..." : "Send email"}
               </button>
-
-              {drafts[invoice.id] && (
-                <button
-                  onClick={() => handleSend(invoice)}
-                  disabled={sending[invoice.id]}
-                  style={{ background: "#1D4ED8", color: "#fff", border: "none", padding: "8px 18px", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
-                >
-                  {sending[invoice.id] ? "Sending..." : "Send email"}
-                </button>
-              )}
-            </div>
+            )}
           </div>
 
           {drafts[invoice.id] && (
