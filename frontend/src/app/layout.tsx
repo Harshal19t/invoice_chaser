@@ -11,7 +11,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <nav style={{
   background: "white",
   borderBottom: "1px solid #E5E7EB",
-  padding: "0 40px",
+  padding: "0 24px",  // reduced from 40px
   height: "56px",
   display: "flex",
   alignItems: "center",
@@ -21,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   zIndex: 50
 }}>
   <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
-  <Image src={remin} alt="Remin" width={200} height={100}
+  <Image src={remin} alt="Remin" width={90} height={40}
     style={{ objectFit: "contain", mixBlendMode: "multiply" }} />
 </Link>
   <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
