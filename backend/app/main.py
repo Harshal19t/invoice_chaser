@@ -47,7 +47,8 @@ def get_overdue_invoices():
     return response.data
 
 @app.post("/extract_invoice")    
-def extract_invoice_endpoint(request: ExtractRequest):
+def extract_invoice_endpoint(request: ExtractRequest, authorization: str = Header(None)):
+    get_user_id(authorization)
     extracted_data = extract_invoice(request.text)
     return extracted_data
 
@@ -66,7 +67,8 @@ def draft_reminder_endpoint(invoice_id: str, request: ReminderRequest):
     return {"subject": email.subject, "body": email.body}
 
 @app.post("/extract_pdf")
-async def extract_pdf_endpoint(file: UploadFile = File(...)):
+async def extract_pdf_endpoint(file: UploadFile = File(...), authorization: str = Header(None)):
+    get_user_id(authorization)
     file_bytes = await file.read()
     extracted_text = extract_text_from_pdf(file_bytes)
     extracted_data = extract_invoice(extracted_text)
