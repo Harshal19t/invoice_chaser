@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase"
 import Image from "next/image"
@@ -15,6 +15,14 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener("resize", check)
+    return () => window.removeEventListener("resize", check)
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -37,16 +45,17 @@ export default function LoginPage() {
       minHeight: "100vh",
       background: "#F0EDE8",
       display: "flex",
-      alignItems: "center",
+      alignItems: isMobile ? "flex-start" : "center",
       justifyContent: "center",
-      padding: "40px 24px",
+      padding: isMobile ? "40px 20px" : "40px 24px",
     }}>
       <div style={{
         display: "flex",
+        flexDirection: isMobile ? "column" : "row",
         width: "100%",
         maxWidth: "960px",
-        gap: "60px",
-        alignItems: "center",
+        gap: isMobile ? "32px" : "60px",
+        alignItems: isMobile ? "stretch" : "center",
       }}>
 
         {/* LEFT — logo + text */}
@@ -56,43 +65,56 @@ export default function LoginPage() {
             alt="Remin"
             width={160}
             height={60}
-            style={{ objectFit: "contain", mixBlendMode: "multiply", marginBottom: "32px", display: "block" }}
+            style={{ objectFit: "contain", mixBlendMode: "multiply", marginBottom: "24px", display: "block" }}
           />
-          <h2 style={{ fontSize: "36px", fontWeight: 800, color: "#16202B", margin: "0 0 16px 0", lineHeight: 1.2 }}>
+          <h2 style={{
+            fontSize: isMobile ? "32px" : "36px",
+            fontWeight: 800,
+            color: "#16202B",
+            margin: "0 0 14px 0",
+            lineHeight: 1.2,
+          }}>
             Chase invoices,<br />not clients.
           </h2>
-          <p style={{ fontSize: "15px", color: "#6B7280", lineHeight: 1.8, margin: "0 0 40px 0", maxWidth: "360px" }}>
-            Remin tracks your overdue invoices and sends polite, professional reminder emails so you get paid faster without the awkward follow-ups.
+          <p style={{
+            fontSize: "15px",
+            color: "#6B7280",
+            lineHeight: 1.8,
+            margin: "0 0 32px 0",
+          }}>
+            Remin tracks your overdue invoices and sends polite, professional reminder emails — so you get paid faster without the awkward follow-ups.
           </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {[
-              "AI-powered invoice extraction",
-              "Automated chaser emails",
-              "Multi-client ledger",
-            ].map(f => (
-              <div key={f} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <div style={{
-                  width: "20px", height: "20px", borderRadius: "50%",
-                  background: "#0E6B5C", display: "flex", alignItems: "center",
-                  justifyContent: "center", flexShrink: 0,
-                }}>
-                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                    <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+          {!isMobile && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              {[
+                "AI-powered invoice extraction",
+                "Automated chaser emails",
+                "Multi-client ledger",
+              ].map(f => (
+                <div key={f} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{
+                    width: "20px", height: "20px", borderRadius: "50%",
+                    background: "#0E6B5C", display: "flex", alignItems: "center",
+                    justifyContent: "center", flexShrink: 0,
+                  }}>
+                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                      <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <span style={{ fontSize: "14px", color: "#374151" }}>{f}</span>
                 </div>
-                <span style={{ fontSize: "14px", color: "#374151" }}>{f}</span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* RIGHT — login card */}
         <div style={{
-          width: "420px",
+          width: isMobile ? "100%" : "420px",
           flexShrink: 0,
           background: "white",
           borderRadius: "20px",
-          padding: "48px 44px",
+          padding: isMobile ? "36px 24px" : "48px 44px",
           boxShadow: "0 2px 24px rgba(0,0,0,0.07)",
         }}>
           <h1 style={{ margin: "0 0 6px 0", fontSize: "24px", fontWeight: 700, color: "#16202B" }}>
