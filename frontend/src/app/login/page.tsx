@@ -35,82 +35,144 @@ export default function LoginPage() {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "#F5F3EE",
+      background: "#F0EDE8",
       display: "flex",
-      flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
-      padding: "24px",
+      padding: "40px 24px",
     }}>
-      {/* Logo */}
-      <div style={{ marginBottom: "32px" }}>
-        <Image src={remin} alt="Remin" width={160} height={60}
-          style={{ objectFit: "contain", mixBlendMode: "multiply" }} />
-      </div>
-
-      {/* Card */}
       <div style={{
-        background: "white",
-        borderRadius: "16px",
-        padding: "40px",
+        display: "flex",
         width: "100%",
-        maxWidth: "400px",
-        boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
+        maxWidth: "960px",
+        gap: "60px",
+        alignItems: "center",
       }}>
-        <h1 style={{ margin: "0 0 6px 0", fontSize: "22px", fontWeight: 700, color: "#16202B", textAlign: "center" }}>
-          {isSignUp ? "Create your account" : "Welcome back"}
-        </h1>
-        <p style={{ margin: "0 0 28px 0", color: "#6B7280", fontSize: "14px", textAlign: "center" }}>
-          {isSignUp ? "Start chasing invoices smarter" : "Sign in to your account"}
-        </p>
 
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: "14px" }}>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 500, marginBottom: "6px", color: "#374151" }}>Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-              style={{ width: "100%", padding: "11px 14px", border: "1px solid #E5E7EB", borderRadius: "10px", fontSize: "14px", boxSizing: "border-box", outline: "none", color: "#16202B", background: "#FAFAFA" }}
-            />
+        {/* LEFT — logo + text */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <Image
+            src={remin}
+            alt="Remin"
+            width={160}
+            height={60}
+            style={{ objectFit: "contain", mixBlendMode: "multiply", marginBottom: "32px", display: "block" }}
+          />
+          <h2 style={{ fontSize: "36px", fontWeight: 800, color: "#16202B", margin: "0 0 16px 0", lineHeight: 1.2 }}>
+            Chase invoices,<br />not clients.
+          </h2>
+          <p style={{ fontSize: "15px", color: "#6B7280", lineHeight: 1.8, margin: "0 0 40px 0", maxWidth: "360px" }}>
+            Remin tracks your overdue invoices and sends polite, professional reminder emails so you get paid faster without the awkward follow-ups.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {[
+              "AI-powered invoice extraction",
+              "Automated chaser emails",
+              "Multi-client ledger",
+            ].map(f => (
+              <div key={f} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{
+                  width: "20px", height: "20px", borderRadius: "50%",
+                  background: "#0E6B5C", display: "flex", alignItems: "center",
+                  justifyContent: "center", flexShrink: 0,
+                }}>
+                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                    <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <span style={{ fontSize: "14px", color: "#374151" }}>{f}</span>
+              </div>
+            ))}
           </div>
+        </div>
 
-          <div style={{ marginBottom: "20px" }}>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 500, marginBottom: "6px", color: "#374151" }}>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              style={{ width: "100%", padding: "11px 14px", border: "1px solid #E5E7EB", borderRadius: "10px", fontSize: "14px", boxSizing: "border-box", outline: "none", color: "#16202B", background: "#FAFAFA" }}
-            />
-          </div>
+        {/* RIGHT — login card */}
+        <div style={{
+          width: "420px",
+          flexShrink: 0,
+          background: "white",
+          borderRadius: "20px",
+          padding: "48px 44px",
+          boxShadow: "0 2px 24px rgba(0,0,0,0.07)",
+        }}>
+          <h1 style={{ margin: "0 0 6px 0", fontSize: "24px", fontWeight: 700, color: "#16202B" }}>
+            {isSignUp ? "Create account" : "Welcome back"}
+          </h1>
+          <p style={{ margin: "0 0 32px 0", color: "#6B7280", fontSize: "14px" }}>
+            {isSignUp ? "Start chasing invoices smarter" : "Sign in to your account"}
+          </p>
 
-          {error && (
-            <p style={{ color: "#DC2626", fontSize: "13px", marginBottom: "14px", background: "#FEF2F2", padding: "10px 12px", borderRadius: "8px" }}>{error}</p>
-          )}
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: "16px" }}>
+              <label style={{ display: "block", fontSize: "13px", fontWeight: 500, marginBottom: "6px", color: "#374151" }}>
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+                style={{
+                  width: "100%", padding: "12px 14px",
+                  border: "1px solid #E5E7EB", borderRadius: "10px",
+                  fontSize: "14px", boxSizing: "border-box",
+                  outline: "none", background: "#F9FAFB", color: "#16202B",
+                }}
+              />
+            </div>
+            <div style={{ marginBottom: "28px" }}>
+              <label style={{ display: "block", fontSize: "13px", fontWeight: 500, marginBottom: "6px", color: "#374151" }}>
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                style={{
+                  width: "100%", padding: "12px 14px",
+                  border: "1px solid #E5E7EB", borderRadius: "10px",
+                  fontSize: "14px", boxSizing: "border-box",
+                  outline: "none", background: "#F9FAFB", color: "#16202B",
+                }}
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{ width: "100%", padding: "12px", background: "#0E6B5C", color: "white", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1 }}
-          >
-            {loading ? "Please wait..." : isSignUp ? "Create account" : "Sign in"}
-          </button>
-        </form>
+            {error && (
+              <p style={{ color: "#DC2626", fontSize: "13px", marginBottom: "16px", background: "#FEF2F2", padding: "10px 12px", borderRadius: "8px" }}>
+                {error}
+              </p>
+            )}
 
-        <p style={{ textAlign: "center", marginTop: "20px", fontSize: "13px", color: "#6B7280" }}>
-          {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-          <button
-            onClick={() => setIsSignUp(!isSignUp)}
-            style={{ background: "none", border: "none", color: "#0E6B5C", fontWeight: 600, cursor: "pointer", padding: 0, fontSize: "13px" }}
-          >
-            {isSignUp ? "Sign in" : "Sign up"}
-          </button>
-        </p>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: "100%", padding: "14px",
+                background: "#0E6B5C", color: "white",
+                border: "none", borderRadius: "10px",
+                fontSize: "15px", fontWeight: 600,
+                cursor: loading ? "not-allowed" : "pointer",
+                opacity: loading ? 0.7 : 1,
+              }}
+            >
+              {loading ? "Please wait..." : isSignUp ? "Create account" : "Sign in"}
+            </button>
+          </form>
+
+          <p style={{ textAlign: "center", marginTop: "24px", fontSize: "13px", color: "#6B7280" }}>
+            {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+            <button
+              onClick={() => setIsSignUp(!isSignUp)}
+              style={{ background: "none", border: "none", color: "#0E6B5C", fontWeight: 700, cursor: "pointer", padding: 0, fontSize: "13px" }}
+            >
+              {isSignUp ? "Sign in" : "Sign up"}
+            </button>
+          </p>
+        </div>
+
       </div>
     </div>
   )
