@@ -64,8 +64,12 @@ class ReminderRequest(BaseModel):
     sender_name: str
 
 @app.post("/invoices/{invoice_id}/draft-reminder")
-def draft_reminder_endpoint(invoice_id: str, request: ReminderRequest):
-    response = supabase.table("invoices").select("*").eq("id", invoice_id).single().execute()
+def draft_reminder_endpoint(invoice_id: str, request: ReminderRequest, authorization: str = Header(None)):
+    get_user_id(authorization)
+    token = authorization.split(" ")[1]
+    client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+    client.auth.set_session(token, "dummy-refresh")
+    response = client.table("invoices").select("*").eq("id", invoice_id).single().execute()
     invoice = response.data
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
