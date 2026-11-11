@@ -59,11 +59,18 @@ export default function LedgerPage() {
   const isMobile = width < 900
 
   useEffect(() => {
-    fetch(process.env.NEXT_PUBLIC_API_URL + "/invoices")
+  const supabase = createClient()
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    fetch(process.env.NEXT_PUBLIC_API_URL + "/invoices", {
+      headers: {
+        Authorization: `Bearer ${session?.access_token ?? ""}`,
+      },
+    })
       .then(res => res.json())
-      .then(data => { setInvoices(data); setLoading(false) })
+      .then(data => { setInvoices(Array.isArray(data) ? data : []); setLoading(false) })
       .catch(() => setLoading(false))
-  }, [])
+  })
+}, [])
 
   async function handleStatusChange(invoiceId: string, newStatus: string) {
     setUpdating(prev => ({ ...prev, [invoiceId]: true }))
