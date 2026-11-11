@@ -26,12 +26,19 @@ export default function ApprovalsPage() {
   const [sending, setSending] = useState<Record<string, boolean>>({})
   const [senderName, setSenderName] = useState("")
 
-  useEffect(() => {
-    fetch(process.env.NEXT_PUBLIC_API_URL + "/invoices/overdue")
+useEffect(() => {
+  const supabase = createClient()
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    fetch(process.env.NEXT_PUBLIC_API_URL + "/invoices/overdue", {
+      headers: {
+        Authorization: `Bearer ${session?.access_token ?? ""}`,
+      },
+    })
       .then(res => res.json())
-      .then(data => { setInvoices(data); setLoading(false) })
+      .then(data => { setInvoices(Array.isArray(data) ? data : []); setLoading(false) })
       .catch(() => setLoading(false))
-  }, [])
+  })
+}, [])
 
   async function handleDraft(invoice: Invoice) {
     setDrafting(prev => ({ ...prev, [invoice.id]: true }))
