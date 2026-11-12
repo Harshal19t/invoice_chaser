@@ -89,18 +89,25 @@ async def extract_pdf_endpoint(file: UploadFile = File(...), authorization: str 
 @app.post("/invoices/{invoice_id}/send-reminder")
 def send_reminder_endpoint(invoice_id: str, request: ReminderRequest, authorization: str = Header(None)):
     get_user_id(authorization)
-    response = supabase.table("invoices").select("*").eq("id", invoice_id).single().execute()
+    token = authorization.split(" ")[1]
+    client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+    client.auth.set_session(token, "dummy-refresh")
+    
+    response = client.table("invoices").select("*").eq("id", invoice_id).single().execute()
     invoice = response.data
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
     
+    if not invoice.get("client_email"):
+        raise HTTPException(status_code=400, detail="No client email on this invoice")
+    
     from app.reminder import send_reminder
-    result = send_reminder(invoice, request.sender_name)
-    token = authorization.split(" ")[1]
-    client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
-    client.auth.set_session(token, "dummy-refresh")
+    send_reminder(invoice, request.sender_name)
+    
+    # Update status to chased
     client.table("invoices").update({"status": "chased"}).eq("id", invoice_id).execute()
-    return result
+    
+    return {"status": "sent"}
 
 @app.post("/invoices")
 def save_invoice_endpoint(request: ExtractRequest, authorization: str = Header(None)):
