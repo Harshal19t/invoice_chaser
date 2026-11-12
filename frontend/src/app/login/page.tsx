@@ -100,7 +100,7 @@ export default function LoginPage() {
             lineHeight: 1.8,
             margin: "0 0 32px 0",
           }}>
-            Remin tracks your overdue invoices and sends polite, professional reminder emails — so you get paid faster without the awkward follow-ups.
+            Remin tracks your overdue invoices and sends polite, professional reminder emails so you get paid faster without the awkward follow-ups.
           </p>
           {!isMobile && (
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
