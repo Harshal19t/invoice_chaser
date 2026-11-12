@@ -49,7 +49,21 @@ export default function LoginPage() {
       justifyContent: "center",
       padding: "40px 24px",
       boxSizing: "border-box",
+      position: "relative",
     }}>
+
+      {/*Dot grid background*/}
+      <div style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 0,
+        backgroundImage: "radial-gradient(circle, #9CA3AF 1px, transparent 1px)",
+        backgroundSize: "28px 28px",
+        opacity: 0.35,
+        pointerEvents: "none",
+      }} />
+
+      {/* Content */}
       <div style={{
         display: "flex",
         flexDirection: isMobile ? "column" : "row",
@@ -58,6 +72,8 @@ export default function LoginPage() {
         gap: isMobile ? "32px" : "60px",
         alignItems: isMobile ? "stretch" : "center",
         overflow: "hidden",
+        position: "relative",
+        zIndex: 1,
       }}>
 
         {/* LEFT — logo + text */}
@@ -117,7 +133,11 @@ export default function LoginPage() {
           background: "white",
           borderRadius: "20px",
           padding: isMobile ? "36px 24px" : "48px 44px",
-          boxShadow: "0 2px 24px rgba(0,0,0,0.07)",
+          //boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)",
+          // boxShadow: "0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)",
+          boxShadow: "none",
+          border: "1px solid rgba(0,0,0,0.08)",
+          overflow: "hidden",
           boxSizing: "border-box",
         }}>
           <h1 style={{ margin: "0 0 6px 0", fontSize: "24px", fontWeight: 700, color: "#16202B" }}>
