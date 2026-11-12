@@ -7,6 +7,7 @@ class InvoiceExtraction(BaseModel):
     is_invoice: Optional[bool] = None
     invoice_number: Optional[str] = None
     client_name: Optional[str] = None
+    client_email: Optional[str] = None
     amount: Optional[Decimal] = None
     currency: Optional[str] = None
     issue_date: Optional[date] = None
